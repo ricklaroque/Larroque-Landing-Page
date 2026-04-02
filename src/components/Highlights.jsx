@@ -2,11 +2,11 @@ import React from 'react';
 
 export function Highlights({ highlights }) {
   return (
-    <section id="destaques" className="rounded-[8px] border border-amber-200 bg-white p-8 shadow-[0_18px_40px_rgba(35,24,16,0.06)] px-4">
+    <section id="destaques" className="rounded-[8px] border border-slate-200 bg-white p-8 shadow-sm px-4">
       <div className="mx-auto max-w-[60%]">
         <div className="mb-6">
-        <p className="mb-2 text-xs uppercase tracking-widest text-amber-700">Destaques Larroque</p>
-        <h2 className="text-3xl font-bold text-amber-900">Vantagens preparadas para acelerar seu projeto.</h2>
+        <p className="mb-2 text-xs uppercase tracking-widest text-slate-500">Destaques Larroque</p>
+        <h2 className="text-3xl font-bold text-slate-900">Vantagens preparadas para acelerar seu projeto.</h2>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         {highlights.map((item) => (

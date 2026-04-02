@@ -9,6 +9,10 @@
   --radius: 22px;
 }
 
+.swiper-wrapper {
+  transition-timing-function: linear !important;
+}
+
 * {
   box-sizing: border-box;
 }

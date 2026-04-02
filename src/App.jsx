@@ -1,6 +1,7 @@
 import React from 'react';
 import { Header } from "./components/Header.jsx";
 import { Hero } from "./components/Hero.jsx";
+import { Carousel } from "./components/Carousel.jsx";
 import { Highlights } from "./components/Highlights.jsx";
 import { About } from "./components/About.jsx";
 import { Contact } from "./components/Contact.jsx";
@@ -33,6 +34,16 @@ const categories = [
   "EPI e seguranca"
 ];
 
+const carouselImages = [
+  "/images/carousel-images/ACTEC.jpg",
+  "/images/carousel-images/ELLO.jfif",
+  "/images/carousel-images/JSempreiteira.jfif",
+  "/images/carousel-images/Osirnet.jpg",
+  "/images/carousel-images/Peruzzo.jpg",
+  "/images/carousel-images/SSConstrutora.jpg",
+  "/images/carousel-images/VLDconstrucoes.jpg",
+];
+
 const contacts = {
   whatsapp: "https://api.whatsapp.com/send?phone=555391544789&text=Ola%2C%20quero%20atendimento%20da%20Larroque.",
   phone: "(53) 3228-2536",
@@ -48,8 +59,9 @@ export function App() {
 
       <Header contacts={contacts} />
 
-      <main className="relative z-20 mx-auto mt-[380px] w-screen space-y-6 pb-10">
+      <main className="relative z-20 mx-auto mt-[120px] w-screen space-y-6 pb-10">
         <Hero contacts={contacts} />
+        <Carousel slides={carouselImages} />
         <Highlights highlights={highlights} />
         <About categories={categories} />
         <Contact contacts={contacts} />

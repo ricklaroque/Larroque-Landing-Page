@@ -1,9 +1,11 @@
 import React from 'react';
+import { MapPin, PhoneCall, MessageCircle, Clock } from 'lucide-react';
+import { FaFacebookF, FaInstagram } from 'react-icons/fa';
 
 export function Footer({ contacts }) {
   return (
-    <footer className="bg-amber-900 px-4 py-12 text-white">
-      <div className="mx-auto max-w-[60%]">
+    <footer className="bg-slate-900 px-4 py-12 text-white">
+        <div className="mx-auto max-w-[1120px] w-[min(92vw,1120px)]">
         <div className="mb-8 grid gap-8 md:grid-cols-4">
           {/* Logo e Descrição */}
           <div>
@@ -20,21 +22,21 @@ export function Footer({ contacts }) {
           {/* Contato e Localização */}
           <div className="flex flex-col gap-4">
             <div className="flex items-start gap-3">
-              <span className="text-xl">📍</span>
+              <MapPin className="h-5 w-5 text-amber-300" />
               <div>
                 <p className="text-xs font-semibold uppercase text-amber-300">Localização</p>
                 <p className="text-sm text-amber-100">{contacts.address}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <span className="text-xl">📞</span>
+              <PhoneCall className="h-5 w-5 text-amber-300" />
               <div>
                 <p className="text-xs font-semibold uppercase text-amber-300">Telefone</p>
                 <p className="text-sm text-amber-100">{contacts.phone}</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <span className="text-xl">💬</span>
+              <MessageCircle className="h-5 w-5 text-amber-300" />
               <div>
                 <p className="text-xs font-semibold uppercase text-amber-300">WhatsApp</p>
                 <a href={contacts.whatsapp} target="_blank" rel="noreferrer" className="text-sm text-amber-300 transition hover:text-white">
@@ -47,7 +49,7 @@ export function Footer({ contacts }) {
           {/* Horário de Trabalho */}
           <div>
             <div className="flex items-start gap-3">
-              <span className="text-xl">🕐</span>
+              <Clock className="h-5 w-5 text-amber-300" />
               <div>
                 <p className="text-xs font-semibold uppercase text-amber-300 mb-2">Horário de Trabalho</p>
                 <ul className="space-y-1 text-sm text-amber-100">
@@ -63,11 +65,11 @@ export function Footer({ contacts }) {
             <p className="mb-3 text-xs font-semibold uppercase text-amber-300">Redes Sociais</p>
             <div className="flex flex-col gap-3">
               <a href="#" className="inline-flex items-center gap-2 text-sm text-amber-300 transition hover:text-white">
-                <span className="text-xl">f</span>
+                <FaFacebookF className="h-4 w-4" />
                 Facebook
               </a>
               <a href="#" className="inline-flex items-center gap-2 text-sm text-amber-300 transition hover:text-white">
-                <span className="text-xl">📷</span>
+                <FaInstagram className="h-4 w-4" />
                 Instagram
               </a>
             </div>
