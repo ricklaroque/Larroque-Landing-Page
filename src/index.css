@@ -2,28 +2,5 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg: #f4f7fb;
-  --paper: #ffffff;
-  --ink: #1f2937;
-  --muted: #4b5563;
-  --primary: #0f4c81;
-  --secondary: #1f7dc5;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  color: var(--ink);
-  background-color: var(--bg);
-  font-family: 'Barlow', sans-serif;
-}
-
-a {
-  color: var(--primary);
-}
-
-button, .btn {
-  font-family: 'Barlow', sans-serif;
-}
+/* Base visual da landing esta em styles.css. */
 

@@ -30,7 +30,7 @@ export function Header({ contacts }) {
             style={{ backgroundImage: "url('/images/parallax1.png')" }}
             >
             <h1 className="text-white text-4xl text-center z-10">
-                QUERO METER NO CUZINHO DO ADRIEL
+                FORCA PARA CONSTRUIR COM A LARROQUE
             </h1>
         </div>
     </div>
