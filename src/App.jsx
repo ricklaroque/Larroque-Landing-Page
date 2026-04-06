@@ -1,4 +1,5 @@
 import React from 'react';
+import { FaWhatsapp } from 'react-icons/fa';
 import { useTracking } from './hooks/useTracking';
 
 const contacts = {
@@ -74,6 +75,29 @@ export function App() {
     track('cta_click', { location, cta_label: ctaLabel });
   };
 
+  React.useEffect(() => {
+    const elements = document.querySelectorAll('[data-scroll-up]');
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.16,
+        rootMargin: '0px 0px -8% 0px'
+      }
+    );
+
+    elements.forEach((element) => observer.observe(element));
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="lp-root">
       <a
@@ -84,13 +108,13 @@ export function App() {
         aria-label="Abrir conversa no WhatsApp"
         onClick={() => track('contact_whatsapp_click', { location: 'floating_button' })}
       >
-        Whats
+        <FaWhatsapp className="lp-whats-icon" aria-hidden="true" />
       </a>
 
       <main>
         <section className="hero" id="inicio">
           <div className="hero-image-mask" aria-hidden="true">
-            <div className="hero-image-placeholder">Imagem principal em breve</div>
+            <img src="/images/parallax1.png" alt="" className="hero-image-main" />
           </div>
 
           <div className="hero-top section-inner">
@@ -107,7 +131,7 @@ export function App() {
             </nav>
           </div>
 
-          <div className="hero-content section-inner reveal">
+          <div className="hero-content section-inner scroll-up is-visible">
             <h1>
               O centro
               <br />
@@ -128,9 +152,9 @@ export function App() {
         </section>
 
         <section className="lp-block lp-block-soft" id="destaques">
-          <div className="section-inner">
+          <div className="section-inner scroll-up" data-scroll-up>
             <div className="lp-section-head">
-              <h2>PARCEIROS</h2>
+              <h2>Parceiros</h2>
               <p>Confira alguns dos nossos parceiros que colaboram com a Larroque.</p>
             </div>
 
@@ -146,26 +170,8 @@ export function App() {
           </div>
         </section>
 
-        <section className="lp-block lp-block-white" id="marcas">
-          <div className="section-inner">
-            <div className="lp-section-head">
-              <h2>MARCAS QUE TRABALHAMOS</h2>
-              <p>Algumas marcas e parceiros que fazem parte da nossa rotina de atendimento.</p>
-            </div>
-
-            <div className="brands-grid" aria-label="Lista de marcas">
-              {brands.map((brand) => (
-                <article className="brand-card" key={brand.alt}>
-                  <BrandLogo src={brand.src} alt={brand.alt} />
-                  <p>{brand.alt}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
         <section className="lp-band lp-band-red">
-          <div className="section-inner lp-band-content">
+          <div className="section-inner lp-band-content scroll-up" data-scroll-up>
             <p>
               Pedidos via
               <br />
@@ -190,7 +196,7 @@ export function App() {
         </section>
 
         <section className="lp-block lp-block-white" id="sobre">
-          <div className="section-inner about-layout">
+          <div className="section-inner about-layout scroll-up" data-scroll-up>
             <div className="about-title">
               <p>Sobre a</p>
               <h2>Larroque</h2>
@@ -218,24 +224,35 @@ export function App() {
         </section>
 
         <section className="lp-band lp-band-store">
-          <div className="section-inner lp-store-copy">
-            <p>
-              Seja construcao,
-              <br />
-              reforma, decoracao
-              <br />
-              ou jardinagem.
-            </p>
-            <strong>
-              Aqui voce
-              <br />
-              encontra tudo.
-            </strong>
+          <div className="section-inner lp-store-copy scroll-up" data-scroll-up>
+            <p>Seja construcao, reforma, decoracao ou jardinagem.</p>
+            <strong>Tudo para sua obra.</strong>
+          </div>
+        </section>
+
+        <section className="lp-block lp-block-white" id="marcas">
+          <div className="section-inner scroll-up" data-scroll-up>
+            <div className="lp-section-head">
+              <h2>Marcas que trabalhamos</h2>
+              <p>Algumas marcas e parceiros que fazem parte da nossa rotina de atendimento.</p>
+            </div>
+
+            <div className="brands-grid" aria-label="Lista de marcas">
+              {brands.map((brand) => (
+                <article
+                  className={`brand-card${brand.alt === 'Dagoberto Barcellos' ? ' brand-card--dagoberto' : ''}${brand.alt === 'Tramontina' ? ' brand-card--tramontina' : ''}`}
+                  key={brand.alt}
+                >
+                  <BrandLogo src={brand.src} alt={brand.alt} />
+                  <p>{brand.alt}</p>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
         <section className="lp-block lp-block-soft" id="blog">
-          <div className="section-inner">
+          <div className="section-inner scroll-up" data-scroll-up>
             <div className="lp-section-head">
               <h2>Blog</h2>
             </div>
@@ -262,7 +279,7 @@ export function App() {
       </main>
 
       <footer id="contato" className="lp-footer">
-        <div className="section-inner footer-grid">
+        <div className="section-inner footer-grid scroll-up" data-scroll-up>
           <div>
             <p className="footer-brand">Larroque</p>
             <p>Ferragem e Materiais</p>

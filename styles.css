@@ -52,10 +52,14 @@ a {
   color: #fff;
   display: grid;
   place-items: center;
-  font-weight: 700;
-  font-size: 0.82rem;
+  font-size: 0;
   z-index: 70;
   box-shadow: 0 10px 22px rgba(22, 109, 61, 0.3);
+}
+
+.lp-whats-icon {
+  font-size: 2.15rem;
+  line-height: 1;
 }
 
 .hero {
@@ -67,9 +71,14 @@ a {
 .hero-image-mask {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(120deg, rgba(241, 243, 247, 0.95), rgba(220, 226, 235, 0.68)),
-    linear-gradient(165deg, #ebeff4, #d2dae4);
+  background: #d7dde6;
+}
+
+.hero-image-main {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
 .hero-image-mask::after {
@@ -77,24 +86,8 @@ a {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(100deg, rgba(255, 255, 255, 0.82) 0 45%, transparent 60%),
-    radial-gradient(circle at 75% 35%, rgba(90, 115, 150, 0.35), transparent 45%);
-}
-
-.hero-image-placeholder {
-  position: absolute;
-  right: 4vw;
-  top: 18%;
-  width: min(500px, 52vw);
-  aspect-ratio: 16 / 11;
-  border: 2px dashed rgba(80, 96, 122, 0.5);
-  color: rgba(61, 78, 105, 0.8);
-  background: rgba(226, 233, 243, 0.72);
-  display: grid;
-  place-items: center;
-  text-transform: uppercase;
-  letter-spacing: 0.11em;
-  font-size: 0.74rem;
+    linear-gradient(100deg, rgba(255, 255, 255, 0.76) 0 46%, rgba(255, 255, 255, 0.12) 70%),
+    radial-gradient(circle at 70% 35%, rgba(6, 24, 53, 0.38), transparent 54%);
 }
 
 .hero-top {
@@ -288,6 +281,16 @@ a {
   object-position: center;
 }
 
+.brand-card--dagoberto .brand-card-image {
+  width: 205px;
+  height: 82px;
+}
+
+.brand-card--tramontina .brand-card-image {
+  width: 220px;
+  height: 88px;
+}
+
 .brand-card-fallback {
   width: 180px;
   height: 72px;
@@ -453,30 +456,51 @@ a {
 }
 
 .lp-band-store {
-  background: linear-gradient(120deg, #a32e38, #cb3d48, #8f2932);
+  min-height: clamp(280px, 34vw, 360px);
+  isolation: isolate;
+  background-color: #101722;
+  background-image:
+    linear-gradient(98deg, rgba(8, 13, 20, 0.92) 0%, rgba(8, 13, 20, 0.82) 42%, rgba(8, 13, 20, 0.52) 66%, rgba(8, 13, 20, 0.66) 100%),
+    radial-gradient(circle at 18% 38%, rgba(211, 77, 77, 0.14), transparent 45%);
+  background-repeat: no-repeat, no-repeat;
+  background-size: cover, cover;
+  background-position: center, center;
 }
 
 .lp-band-store::before {
-  background:
-    linear-gradient(95deg, rgba(0, 0, 0, 0.23), transparent 70%),
-    radial-gradient(circle at 68% 62%, rgba(255, 255, 255, 0.14), transparent 44%);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0));
+  z-index: 0;
 }
 
 .lp-store-copy {
   position: relative;
   z-index: 2;
   color: #fff;
-  min-height: 250px;
+  min-height: clamp(280px, 34vw, 360px);
   display: grid;
   align-content: center;
-  gap: 12px;
+  justify-items: start;
+  align-items: start;
+  text-align: left;
+  gap: 10px;
+  max-width: min(540px, 64vw);
+  padding: 0;
 }
 
-.lp-store-copy p,
+.lp-store-copy p {
+  margin: 0;
+  font-size: clamp(1.85rem, 3.5vw, 3rem);
+  font-weight: 500;
+  line-height: 0.98;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.42);
+}
+
 .lp-store-copy strong {
   margin: 0;
-  font-size: clamp(2rem, 4vw, 3.2rem);
-  line-height: 0.95;
+  font-size: clamp(2.65rem, 5vw, 4.4rem);
+  font-weight: 800;
+  line-height: 0.9;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
 }
 
 .blog-action {
@@ -520,6 +544,18 @@ a {
   font-size: 0.84rem;
 }
 
+.scroll-up {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity 720ms ease, transform 720ms ease;
+  will-change: opacity, transform;
+}
+
+.scroll-up.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .reveal {
   animation: rise-in 620ms ease both;
 }
@@ -538,11 +574,6 @@ a {
 @media (max-width: 980px) {
   .hero-nav {
     gap: 14px;
-  }
-
-  .hero-image-placeholder {
-    width: min(420px, 54vw);
-    top: 21%;
   }
 
   .lp-grid-3,
@@ -573,12 +604,6 @@ a {
     gap: 10px;
   }
 
-  .hero-image-placeholder {
-    position: static;
-    margin: 16px auto 0;
-    width: min(380px, 88vw);
-  }
-
   .hero-content {
     padding-top: 44px;
   }
@@ -601,6 +626,20 @@ a {
 
   .lp-store-copy {
     min-height: 220px;
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .lp-store-copy p {
+    font-size: 1.9rem;
+  }
+
+  .lp-store-copy strong {
+    font-size: 3rem;
+  }
+
+  .lp-band-store {
+    min-height: 300px;
   }
 
   .logo-track {
@@ -618,5 +657,13 @@ a {
   .logo-image {
     width: 150px;
     height: 56px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-up {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
