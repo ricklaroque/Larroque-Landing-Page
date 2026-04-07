@@ -7,7 +7,11 @@ export function Header({ contacts }) {
         <div className="mx-auto max-w-[1120px] w-[min(92vw,1120px)] py-4 px-4">
             <div className="flex items-center justify-between gap-4 text-sm md:text-base">
             <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-brand-500 font-bold text-white">L</span>
+                                <img
+                                    src="/images/download.png"
+                                    alt="Larroque"
+                                    className="h-10 w-14 object-contain"
+                                />
                 <div>
                 <p className="m-0 text-xl font-semibold tracking-wider">Larroque</p>
                 <p className="m-0 text-xs text-amber-800">Ferragem e Materiais</p>
