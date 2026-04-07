@@ -1,9 +1,10 @@
 import React from 'react';
-import { FaRegStar, FaStar, FaStarHalfAlt, FaWhatsapp } from 'react-icons/fa';
+import { FaCookieBite, FaRegStar, FaStar, FaStarHalfAlt, FaWhatsapp } from 'react-icons/fa';
 import { useTracking } from './hooks/useTracking';
+import { readCookieConsent, saveCookieConsent, syncCookieConsentToWindow } from './lib/cookieConsent';
 
 const contacts = {
-  whatsapp: 'https://api.whatsapp.com/send?phone=5553991544789&text=Ola%2C%20gostaria%20de%20atendimento%20da%20Larroque.',
+  whatsapp: 'https://api.whatsapp.com/send?phone=5553991544789&text=Ol%C3%A1%2C%20quero%20um%20or%C3%A7amento.',
   whatsappDisplay: '(53) 99154-4789',
   phone: '(53) 3228-2536',
   address: 'R. Prof. Mario Peiruque, 518 - Areal, Pelotas - RS',
@@ -132,6 +133,85 @@ const fallbackTestimonials = [
 const GOOGLE_PLACES_FIELD_MASK =
   'id,displayName,googleMapsUri,rating,userRatingCount,reviews.authorAttribution,reviews.rating,reviews.relativePublishTimeDescription,reviews.text,reviews.originalText';
 
+const GTM_CONTAINER_ID = 'GTM-5PK28FX2';
+const GA_MEASUREMENT_ID = 'G-Q9NSE5HC5Q';
+const OPTIONAL_COOKIE_NAMES = ['_ga', '_gid', '_gat', '_gcl_au'];
+
+function injectExternalScript(scriptId, source) {
+  if (document.getElementById(scriptId)) {
+    return;
+  }
+
+  const scriptElement = document.createElement('script');
+  scriptElement.id = scriptId;
+  scriptElement.async = true;
+  scriptElement.src = source;
+  document.head.appendChild(scriptElement);
+}
+
+function updateGoogleConsent(optionalSettings) {
+  if (typeof window.gtag !== 'function') {
+    return;
+  }
+
+  const analyticsStorage = optionalSettings.analytics ? 'granted' : 'denied';
+  const adsStorage = optionalSettings.marketing ? 'granted' : 'denied';
+
+  window.gtag('consent', 'update', {
+    analytics_storage: analyticsStorage,
+    ad_storage: adsStorage,
+    ad_user_data: adsStorage,
+    ad_personalization: adsStorage
+  });
+}
+
+function initializeOptionalTracking(optionalSettings, hasLoadedRef) {
+  window.dataLayer = window.dataLayer ?? [];
+
+  if (typeof window.gtag !== 'function') {
+    window.gtag = function gtag() {
+      window.dataLayer.push(arguments);
+    };
+
+    window.gtag('consent', 'default', {
+      analytics_storage: 'denied',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied'
+    });
+
+    window.gtag('js', new Date());
+    window.gtag('config', GA_MEASUREMENT_ID, { anonymize_ip: true });
+  }
+
+  if (!hasLoadedRef.current) {
+    injectExternalScript('lp-ga-script', `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`);
+    injectExternalScript('lp-gtm-script', `https://www.googletagmanager.com/gtm.js?id=${GTM_CONTAINER_ID}`);
+    hasLoadedRef.current = true;
+  }
+
+  updateGoogleConsent(optionalSettings);
+}
+
+function removeCookieByName(name, domain) {
+  const domainPart = domain ? `; domain=${domain}` : '';
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domainPart}`;
+}
+
+function clearOptionalCookies() {
+  const hostname = window.location.hostname;
+  const segments = hostname.split('.');
+  const rootDomain = segments.length > 1 ? `.${segments.slice(-2).join('.')}` : '';
+
+  OPTIONAL_COOKIE_NAMES.forEach((cookieName) => {
+    removeCookieByName(cookieName);
+
+    if (rootDomain) {
+      removeCookieByName(cookieName, rootDomain);
+    }
+  });
+}
+
 function normalizeGoogleReview(review, index, placeUrl) {
   const parsedRating = Number(review.rating);
   const rating = Number.isFinite(parsedRating) ? Math.min(5, Math.max(0, parsedRating)) : 5;
@@ -198,6 +278,15 @@ function BrandLogo({ src, alt }) {
 
 export function App() {
   const { track } = useTracking();
+  const initialConsent = React.useMemo(() => readCookieConsent(), []);
+  const [cookieConsent, setCookieConsent] = React.useState(initialConsent);
+  const [cookiePreferencesDraft, setCookiePreferencesDraft] = React.useState({
+    analytics: initialConsent?.analytics ?? false,
+    marketing: initialConsent?.marketing ?? false
+  });
+  const [isCookieBannerVisible, setIsCookieBannerVisible] = React.useState(initialConsent === null);
+  const [isCookieModalOpen, setIsCookieModalOpen] = React.useState(false);
+  const optionalTrackingLoadedRef = React.useRef(false);
   const [activeReview, setActiveReview] = React.useState(0);
   const [isReviewPaused, setIsReviewPaused] = React.useState(false);
   const [reviews, setReviews] = React.useState(fallbackTestimonials);
@@ -205,6 +294,72 @@ export function App() {
   const trackCta = (location, ctaLabel) => {
     track('cta_click', { location, cta_label: ctaLabel });
   };
+
+  const openCookiePreferences = () => {
+    setCookiePreferencesDraft({
+      analytics: cookieConsent?.analytics ?? false,
+      marketing: cookieConsent?.marketing ?? false
+    });
+    setIsCookieModalOpen(true);
+  };
+
+  const applyCookieChoice = (optionalSettings, source) => {
+    const savedConsent = saveCookieConsent(optionalSettings);
+
+    syncCookieConsentToWindow(savedConsent);
+    setCookieConsent(savedConsent);
+    setCookiePreferencesDraft({
+      analytics: savedConsent.analytics,
+      marketing: savedConsent.marketing
+    });
+    setIsCookieBannerVisible(false);
+    setIsCookieModalOpen(false);
+
+    if (savedConsent.analytics) {
+      track('category_click', {
+        category: 'cookie_preferences',
+        source,
+        analytics: savedConsent.analytics ? 'granted' : 'denied',
+        marketing: savedConsent.marketing ? 'granted' : 'denied'
+      });
+    }
+  };
+
+  React.useEffect(() => {
+    syncCookieConsentToWindow(cookieConsent);
+  }, [cookieConsent]);
+
+  React.useEffect(() => {
+    if (!cookieConsent) {
+      return;
+    }
+
+    const optionalSettings = {
+      analytics: cookieConsent.analytics,
+      marketing: cookieConsent.marketing
+    };
+
+    if (optionalSettings.analytics || optionalSettings.marketing) {
+      initializeOptionalTracking(optionalSettings, optionalTrackingLoadedRef);
+      return;
+    }
+
+    updateGoogleConsent(optionalSettings);
+    clearOptionalCookies();
+  }, [cookieConsent]);
+
+  React.useEffect(() => {
+    if (!isCookieModalOpen) {
+      return undefined;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isCookieModalOpen]);
 
   React.useEffect(() => {
     const elements = document.querySelectorAll('[data-scroll-up]');
@@ -371,8 +526,8 @@ export function App() {
               <span>com entrega rapida no bairro.</span>
             </h1>
             <p className="hero-subtitle">
-              Orcamento rapido em poucos minutos, com atendimento imediato via WhatsApp para voce comprar sem sair da
-              obra.
+              Orcamento rapido em poucos minutos, com atendimento imediato via WhatsApp da Ferragem Larroque em
+              Pelotas para voce comprar sem sair da obra.
             </p>
 
             <a
@@ -390,8 +545,8 @@ export function App() {
         <section className="lp-block lp-block-soft" id="destaques">
           <div className="section-inner scroll-up" data-scroll-up>
             <div className="lp-section-head">
-              <h2>Empresas que ja confiaram na Larroque</h2>
-              <p>Fornecemos materiais para construtoras, empreiteiras e clientes da regiao.</p>
+              <h2>Empresas que confiam na Larroque</h2>
+              <p>Fornecemos materiais para construtoras, empreiteiras e clientes de toda Pelotas</p>
             </div>
 
             <div className="logo-carousel" aria-label="Carrossel de parceiros">
@@ -606,7 +761,151 @@ export function App() {
             <p>Sabado: 8h00 as 17h00</p>
           </div>
         </div>
+
+        <div className="section-inner footer-legal">
+          <p>
+            Privacidade e Cookies: utilizamos cookies necessarios para o funcionamento da pagina e cookies opcionais
+            para estatisticas e campanhas. Voce pode revisar, alterar ou revogar seu consentimento a qualquer momento.
+          </p>
+
+          <button type="button" className="footer-link-button" onClick={openCookiePreferences}>
+            Politica de Privacidade e Preferencias de Cookies
+          </button>
+        </div>
       </footer>
+
+      {!isCookieBannerVisible && (
+        <button
+          type="button"
+          className="cookie-settings-trigger"
+          onClick={openCookiePreferences}
+          aria-label="Revisar preferencias de cookies"
+        >
+          <FaCookieBite className="cookie-settings-icon" aria-hidden="true" />
+        </button>
+      )}
+
+      {isCookieBannerVisible && (
+        <section className="cookie-banner" role="dialog" aria-live="polite" aria-label="Consentimento de cookies">
+          <p className="cookie-banner-title">Sua privacidade importa</p>
+          <p className="cookie-banner-text">
+            Usamos apenas cookies necessarios por padrao. Cookies de analise e marketing so serao ativados com seu
+            consentimento, conforme a LGPD.
+          </p>
+
+          <div className="cookie-banner-actions">
+            <button
+              type="button"
+              className="cookie-btn cookie-btn-muted"
+              onClick={() => applyCookieChoice({ analytics: false, marketing: false }, 'banner_reject')}
+            >
+              Recusar opcionais
+            </button>
+
+            <button type="button" className="cookie-btn cookie-btn-outline" onClick={openCookiePreferences}>
+              Personalizar
+            </button>
+
+            <button
+              type="button"
+              className="cookie-btn cookie-btn-primary"
+              onClick={() => applyCookieChoice({ analytics: true, marketing: true }, 'banner_accept_all')}
+            >
+              Aceitar todos
+            </button>
+          </div>
+        </section>
+      )}
+
+      {isCookieModalOpen && (
+        <div className="cookie-modal-overlay" role="presentation" onClick={() => setIsCookieModalOpen(false)}>
+          <section
+            className="cookie-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Preferencias de privacidade"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2>Preferencias de Privacidade</h2>
+            <p>
+              Aqui voce escolhe quais cookies opcionais podem ser ativados. Cookies necessarios permanecem ativos para
+              garantir seguranca e funcionamento basico da LP.
+            </p>
+
+            <div className="cookie-option">
+              <div>
+                <h3>Necessarios</h3>
+                <p>Essenciais para carregamento da pagina, navegacao e recursos obrigatorios.</p>
+              </div>
+              <span className="cookie-option-badge">Sempre ativo</span>
+            </div>
+
+            <label className="cookie-option cookie-option-toggle">
+              <div>
+                <h3>Analise e desempenho</h3>
+                <p>Ajuda a entender visitas, paginas acessadas e melhorias de experiencia.</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={cookiePreferencesDraft.analytics}
+                onChange={(event) =>
+                  setCookiePreferencesDraft((current) => ({
+                    ...current,
+                    analytics: event.target.checked
+                  }))
+                }
+              />
+            </label>
+
+            <label className="cookie-option cookie-option-toggle">
+              <div>
+                <h3>Marketing</h3>
+                <p>Permite medir campanhas e personalizar anuncios em plataformas parceiras.</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={cookiePreferencesDraft.marketing}
+                onChange={(event) =>
+                  setCookiePreferencesDraft((current) => ({
+                    ...current,
+                    marketing: event.target.checked
+                  }))
+                }
+              />
+            </label>
+
+            <p className="cookie-modal-note">
+              Voce pode alterar esta escolha a qualquer momento no botao de cookies no canto da tela.
+            </p>
+
+            <div className="cookie-modal-actions">
+              <button
+                type="button"
+                className="cookie-btn cookie-btn-muted"
+                onClick={() => applyCookieChoice({ analytics: false, marketing: false }, 'modal_reject')}
+              >
+                Recusar opcionais
+              </button>
+
+              <button
+                type="button"
+                className="cookie-btn cookie-btn-outline"
+                onClick={() => applyCookieChoice(cookiePreferencesDraft, 'modal_save')}
+              >
+                Salvar preferencias
+              </button>
+
+              <button
+                type="button"
+                className="cookie-btn cookie-btn-primary"
+                onClick={() => applyCookieChoice({ analytics: true, marketing: true }, 'modal_accept_all')}
+              >
+                Aceitar todos
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

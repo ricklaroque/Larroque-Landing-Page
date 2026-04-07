@@ -1,3 +1,5 @@
+import { canTrackAnalytics } from '../lib/cookieConsent';
+
 type TrackingEvent =
   | 'category_click'
   | 'contact_phone_click'
@@ -9,8 +11,12 @@ type EventProperties = Record<string, unknown>;
 
 export function useTracking() {
   const track = (event: TrackingEvent, properties?: EventProperties) => {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log('[track]', event, properties);
+      return;
+    }
+
+    if (!canTrackAnalytics()) {
       return;
     }
 
